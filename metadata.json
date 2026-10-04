@@ -1,0 +1,6 @@
+{
+  "name": "Ilwaco Games",
+  "description": "Sleek, authentic web game portal featuring curated HTML5 titles with zero slop and a floating spatial glass navigation dock.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

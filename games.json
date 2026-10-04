@@ -1,0 +1,47 @@
+[
+  {
+    "folder": "2048",
+    "name": "2048",
+    "path": "./2048/index.html"
+  },
+  {
+    "folder": "breakout",
+    "name": "Breakout",
+    "path": "./breakout/index.html"
+  },
+  {
+    "folder": "flappy-bird",
+    "name": "Flappy Bird",
+    "path": "./flappy-bird/index.html"
+  },
+  {
+    "folder": "minesweeper",
+    "name": "Minesweeper",
+    "path": "./minesweeper/index.html"
+  },
+  {
+    "folder": "pong",
+    "name": "Pong",
+    "path": "./pong/index.html"
+  },
+  {
+    "folder": "slope",
+    "name": "Slope",
+    "path": "./slope/index.html"
+  },
+  {
+    "folder": "snake",
+    "name": "Snake",
+    "path": "./snake/index.html"
+  },
+  {
+    "folder": "space-invaders",
+    "name": "Space Invaders",
+    "path": "./space-invaders/index.html"
+  },
+  {
+    "folder": "tetris",
+    "name": "Tetris",
+    "path": "./tetris/index.html"
+  }
+]

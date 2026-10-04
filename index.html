@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Ilwaco Games</title>
+    <meta
+      name="description"
+      content="Spatial VisionOS gaming portal featuring immersive worlds with custom backgrounds, a full custom theme creator studio, liquidGL WebGL/WebGPU liquid glass refraction, and dynamic raw-code Blob URL execution."
+    />
+    <meta property="og:title" content="Ilwaco Games" />
+    <meta
+      property="og:description"
+      content="Spatial VisionOS gaming portal featuring immersive worlds with custom backgrounds, a full custom theme creator studio, liquidGL WebGL/WebGPU liquid glass refraction, and dynamic raw-code Blob URL execution."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#0a0a0c" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ffffff'/><polygon points='40,32 72,50 40,68' fill='%230a0a0c'/></svg>"
+    />
+    <link rel="stylesheet" href="./style.css" />
+
+    <!-- Firebase Web SDK v10+ (Auth & Firestore Compat CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  </head>
+  <body>
+    <!-- Background Wallpaper Layer (Themed, Custom or Uploaded) -->
+    <div id="wallpaper-layer"></div>
+
+    <!-- Clean Minimalist Header (Zero Borders) -->
+    <header class="clean-header">
+      <div class="brand-container">
+        <div class="brand-symbol">
+          <svg viewBox="0 0 24 24">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+        </div>
+        <span class="brand-text">Ilwaco Games</span>
+      </div>
+
+      <div class="header-meta">
+        <span id="catalog-count-meta" style="font-size: 11.5px; font-weight: 600; color: var(--text-dim);">2,820+ Titles</span>
+        <div class="status-indicator">
+          <div class="status-dot"></div>
+          <span>Online</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Scrollable Views Container with 140px Bottom Clearance -->
+    <main id="view-container">
+      <div class="content-bounds">
+        <!-- 1. HOME TAB VIEW -->
+        <section id="view-home" class="tab-view active">
+          <!-- Spotlight Hero Banner -->
+          <div class="hero-spotlight">
+            <div class="hero-subtitle">Featured Title</div>
+            <h1 id="spotlight-title" class="hero-title">10 Minutes Til Dawn</h1>
+            <p id="spotlight-desc" class="hero-desc">
+              Survive against an endless onslaught of eldritch nightmares in this tactical top-down roguelite shooter executed cleanly via dynamic raw-code Blob URL.
+            </p>
+            <div class="hero-btn-row">
+              <button id="spotlight-play-btn" class="btn-primary-play">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                <span>Play Now</span>
+              </button>
+              <button id="spotlight-info-btn" class="btn-secondary-info">
+                Details
+              </button>
+            </div>
+          </div>
+
+          <!-- Section: Quick Play Arcade -->
+          <div class="section-block">
+            <div class="section-head">
+              <h2 class="section-title">Quick Play Arcade</h2>
+              <span class="section-meta">Instant Blob Execution</span>
+            </div>
+            <div id="feed-arcade" class="card-carousel"></div>
+          </div>
+
+          <!-- Section: Sports & Racing -->
+          <div class="section-block">
+            <div class="section-head">
+              <h2 class="section-title">Sports & Competition</h2>
+              <span class="section-meta">Multiplayer & Physics</span>
+            </div>
+            <div id="feed-sports" class="card-carousel"></div>
+          </div>
+
+          <!-- Section: Action & Shooters -->
+          <div class="section-block">
+            <div class="section-head">
+              <h2 class="section-title">Action & Combat</h2>
+              <span class="section-meta">Fast Edits & Aim</span>
+            </div>
+            <div id="feed-action" class="card-carousel"></div>
+          </div>
+        </section>
+
+        <!-- 2. LIBRARY TAB VIEW -->
+        <section id="view-lib" class="tab-view">
+          <div class="library-head-controls">
+            <div class="search-field-wrap">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input
+                id="library-search-input"
+                type="text"
+                class="search-input"
+                placeholder="Search games by title, keyword, or genre..."
+                oninput="onSearchInput(this.value)"
+              />
+            </div>
+
+            <div class="filter-bar">
+              <button class="filter-pill active" data-cat="all" onclick="setCategoryFilter('all')">All Titles</button>
+              <button class="filter-pill" data-cat="Action" onclick="setCategoryFilter('Action')">Action</button>
+              <button class="filter-pill" data-cat="Arcade" onclick="setCategoryFilter('Arcade')">Arcade</button>
+              <button class="filter-pill" data-cat="Sports" onclick="setCategoryFilter('Sports')">Sports</button>
+              <button class="filter-pill" data-cat="Puzzle" onclick="setCategoryFilter('Puzzle')">Puzzle</button>
+              <button class="filter-pill" data-cat="Retro" onclick="setCategoryFilter('Retro')">Retro</button>
+            </div>
+          </div>
+
+          <!-- Games Grid -->
+          <div id="library-games-grid" class="library-grid"></div>
+
+          <!-- Load More -->
+          <div id="load-more-wrap" style="text-align: center; margin: 28px 0;">
+            <button id="load-more-btn" class="btn-secondary" onclick="loadMoreGames()" style="margin: 0 auto;">
+              Load More Games
+            </button>
+          </div>
+        </section>
+
+        <!-- 3. SETTINGS & CUSTOMIZATION VIEW -->
+        <section id="view-set" class="tab-view">
+          <!-- 1. Cloud Sync & Google Auth -->
+          <div class="settings-group">
+            <div class="cloud-sync-box" style="margin-bottom: 16px;">
+              <div class="cloud-status-indicator">
+                <div class="cloud-pulse-dot"></div>
+                <div>
+                  <div class="cloud-status-text">Cloud Sync Engine</div>
+                  <div id="cloud-last-sync-time" class="cloud-sync-meta">Sync game saves and custom themes with Google Firestore</div>
+                </div>
+              </div>
+
+              <div class="btn-action-group">
+                <button class="btn-secondary active-cloud" onclick="syncSavesToCloud()">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                    <polyline points="12 13 12 9 14 11"/>
+                  </svg>
+                  <span>Sync to Cloud Now</span>
+                </button>
+
+                <button class="btn-secondary" onclick="restoreSavesFromCloud()">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                    <polyline points="12 13 12 17 14 15"/>
+                  </svg>
+                  <span>Restore from Cloud</span>
+                </button>
+              </div>
+              <div id="cloud-sync-status-msg" style="font-size: 11.5px; color: var(--accent-primary); margin-top: 8px; min-height: 14px; font-weight: 600;"></div>
+            </div>
+
+            <div class="auth-box">
+              <!-- Signed In State -->
+              <div id="account-signed-in" style="display: none;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <img id="auth-user-avatar" src="" alt="Avatar" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;" />
+                    <div>
+                      <div id="auth-user-name" style="font-size: 14.5px; font-weight: 700; color: #fff;">Google Player</div>
+                      <div id="auth-user-email" style="font-size: 12px; color: var(--text-muted);">player@gmail.com</div>
+                      <div id="auth-user-uid" style="font-size: 11px; color: var(--text-dim);">Google Account Verified</div>
+                    </div>
+                  </div>
+                  <button class="btn-secondary" onclick="signOutUser()">Sign Out</button>
+                </div>
+              </div>
+
+              <!-- Signed Out State (Google Sign In Action) -->
+              <div id="account-signed-out">
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+                  Sign in with your Google account to automatically sync your save files, scores, and custom theme presets across any device.
+                </p>
+
+                <button class="btn-google-auth" onclick="signInWithGoogle()">
+                  <svg class="google-icon-svg" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.89c2.28-2.1 3.65-5.2 3.65-9.15z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.89-3.05c-1.07.72-2.45 1.16-4.04 1.16-3.12 0-5.77-2.1-6.72-4.94H1.24v3.15C3.26 21.36 7.33 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.26c-.25-.72-.38-1.49-.38-2.26s.13-1.54.38-2.26V6.59H1.24C.45 8.16 0 9.93 0 12s.45 3.84 1.24 5.41l4.04-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.59l4.04 3.15c.95-2.84 3.6-4.99 6.72-4.99z"/>
+                  </svg>
+                  <span>Continue with Google</span>
+                </button>
+                <div id="auth-error-msg" style="font-size: 11.5px; color: #f87171; margin-top: 8px; min-height: 14px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Master Immersive Worlds (With Themed Custom Backgrounds) -->
+          <div class="settings-group">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+              <h3 class="settings-heading">Immersive Worlds & Aesthetics</h3>
+              <span id="active-world-badge" style="font-size: 11.5px; font-weight: 700; color: var(--accent-primary);">12 Curated Worlds</span>
+            </div>
+            <p class="settings-sub">Each world loads a hand-picked, thematic background, dedicated color palette, and bespoke spatial atmosphere.</p>
+
+            <div id="immersive-themes-container" class="presets-gallery-grid"></div>
+
+            <!-- Quick Wallpaper Strip -->
+            <div style="margin-top: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 12px; font-weight: 700; color: #ffffff;">Quick Wallpaper Switcher</span>
+                <span id="active-bg-name-label" style="font-size: 11px; color: var(--text-dim);">Theme Curated</span>
+              </div>
+              <div id="wallpaper-quick-strip" class="wallpaper-strip"></div>
+            </div>
+          </div>
+
+          <!-- 3. Custom Theme Creator Studio ("Make Your Own Theme") -->
+          <div class="settings-group">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+              <h3 class="settings-heading">Theme Creator Studio</h3>
+              <span style="font-size: 11.5px; font-weight: 700; color: var(--accent-primary);">Make Your Own</span>
+            </div>
+            <p class="settings-sub">Design your own custom aesthetic with full control over colors, custom backgrounds, liquid glass physics, and optical blur.</p>
+
+            <div class="theme-studio-box">
+              <!-- Live Interactive Preview Window -->
+              <div class="studio-live-preview-box">
+                <div>
+                  <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-primary); margin-bottom: 4px;">Live Preview</div>
+                  <div id="preview-theme-title" style="font-size: 15px; font-weight: 800; color: #fff;">My Custom Theme</div>
+                  <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 2px;">Real-time optical response</div>
+                </div>
+
+                <div class="studio-preview-card">
+                  <div style="font-size: 10px; font-weight: 700; color: var(--accent-primary); margin-bottom: 4px;">PREVIEW CARD</div>
+                  <div style="font-size: 13px; font-weight: 700; color: #fff;">Space Invaders 3D</div>
+                  <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-primary);"></div>
+                    <span style="font-size: 11px; color: var(--accent-secondary);">Dual Accent Glow</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Theme Name -->
+              <div class="theme-studio-row">
+                <label style="font-size: 13px; font-weight: 700; color: #fff;">Theme Name</label>
+                <input
+                  id="studio-theme-name"
+                  type="text"
+                  placeholder="e.g. Cyber Matrix, Hyperdrive 99..."
+                  class="custom-bg-input"
+                  style="max-width: 280px;"
+                  oninput="updateStudioPreview()"
+                />
+              </div>
+
+              <!-- Primary Accent Color with Quick Swatches -->
+              <div>
+                <div class="theme-studio-row" style="margin-bottom: 8px;">
+                  <label style="font-size: 13px; font-weight: 700; color: #fff;">Primary Accent Color</label>
+                  <div class="theme-color-input-wrap">
+                    <input
+                      id="studio-color-primary"
+                      type="color"
+                      value="#38bdf8"
+                      class="theme-color-picker"
+                      oninput="onStudioColorChange('primary', this.value)"
+                    />
+                    <span id="studio-primary-hex" class="color-hex-badge">#38bdf8</span>
+                  </div>
+                </div>
+
+                <div class="quick-swatches-row">
+                  <div class="swatch-chip" style="background: #fcee0a;" title="Cyber Yellow" onclick="applyStudioPrimaryColor('#fcee0a')"></div>
+                  <div class="swatch-chip" style="background: #00ff66;" title="Matrix Green" onclick="applyStudioPrimaryColor('#00ff66')"></div>
+                  <div class="swatch-chip" style="background: #ff007f;" title="Synthwave Pink" onclick="applyStudioPrimaryColor('#ff007f')"></div>
+                  <div class="swatch-chip" style="background: #e879f9;" title="Tokyo Fuchsia" onclick="applyStudioPrimaryColor('#e879f9')"></div>
+                  <div class="swatch-chip" style="background: #00f0ff;" title="Electric Cyan" onclick="applyStudioPrimaryColor('#00f0ff')"></div>
+                  <div class="swatch-chip" style="background: #06b6d4;" title="Arctic Cyan" onclick="applyStudioPrimaryColor('#06b6d4')"></div>
+                  <div class="swatch-chip" style="background: #f59e0b;" title="Solar Gold" onclick="applyStudioPrimaryColor('#f59e0b')"></div>
+                  <div class="swatch-chip" style="background: #f43f5e;" title="Blood Ruby" onclick="applyStudioPrimaryColor('#f43f5e')"></div>
+                  <div class="swatch-chip" style="background: #10b981;" title="Emerald" onclick="applyStudioPrimaryColor('#10b981')"></div>
+                  <div class="swatch-chip" style="background: #c084fc;" title="Cosmic Violet" onclick="applyStudioPrimaryColor('#c084fc')"></div>
+                  <div class="swatch-chip" style="background: #e2e8f0;" title="Platinum White" onclick="applyStudioPrimaryColor('#e2e8f0')"></div>
+                </div>
+              </div>
+
+              <!-- Secondary Accent Color -->
+              <div class="theme-studio-row">
+                <label style="font-size: 13px; font-weight: 700; color: #fff;">Secondary / Gradient Accent</label>
+                <div class="theme-color-input-wrap">
+                  <input
+                    id="studio-color-secondary"
+                    type="color"
+                    value="#818cf8"
+                    class="theme-color-picker"
+                    oninput="onStudioColorChange('secondary', this.value)"
+                  />
+                  <span id="studio-secondary-hex" class="color-hex-badge">#818cf8</span>
+                </div>
+              </div>
+
+              <!-- Background Choice -->
+              <div>
+                <label style="font-size: 13px; font-weight: 700; color: #fff; display: block; margin-bottom: 8px;">Theme Background Wallpaper</label>
+                <div class="theme-studio-row" style="gap: 10px;">
+                  <button class="btn-secondary" onclick="triggerBgUpload()">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/>
+                      <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span>Upload from Computer</span>
+                  </button>
+                  <button class="btn-secondary" onclick="setStudioVoidBg()">
+                    <span>Pure Void (#000000)</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Glass Style Mode -->
+              <div class="theme-studio-row">
+                <label style="font-size: 13px; font-weight: 700; color: #fff;">Glass Material Mode</label>
+                <select id="studio-glass-style" class="custom-bg-input" style="max-width: 220px;" onchange="updateStudioPreview()">
+                  <option value="liquid">Liquid Glass (liquidGL Engine)</option>
+                  <option value="frosted">Frosted Glass (VisionOS Blur)</option>
+                  <option value="opaque">Opaque Matte (Deep Obsidian)</option>
+                </select>
+              </div>
+
+              <!-- Precision Sliders -->
+              <div class="sliders-panel">
+                <!-- Blur -->
+                <div class="slider-group">
+                  <div class="slider-label-row">
+                    <span>Glass Blur (Depth of Field)</span>
+                    <span id="studio-val-blur" class="slider-val-tag">28px</span>
+                  </div>
+                  <input
+                    id="studio-slider-blur"
+                    type="range"
+                    min="0"
+                    max="60"
+                    step="1"
+                    value="28"
+                    class="spatial-slider"
+                    oninput="onStudioSliderChange('blur', this.value, 'px')"
+                  />
+                </div>
+
+                <!-- Opacity -->
+                <div class="slider-group">
+                  <div class="slider-label-row">
+                    <span>Glass Opacity (Translucency)</span>
+                    <span id="studio-val-opacity" class="slider-val-tag">72%</span>
+                  </div>
+                  <input
+                    id="studio-slider-opacity"
+                    type="range"
+                    min="20"
+                    max="98"
+                    step="1"
+                    value="72"
+                    class="spatial-slider"
+                    oninput="onStudioSliderChange('opacity', this.value, '%')"
+                  />
+                </div>
+
+                <!-- Saturation -->
+                <div class="slider-group">
+                  <div class="slider-label-row">
+                    <span>Color Refraction Saturation</span>
+                    <span id="studio-val-saturate" class="slider-val-tag">180%</span>
+                  </div>
+                  <input
+                    id="studio-slider-saturate"
+                    type="range"
+                    min="100"
+                    max="260"
+                    step="5"
+                    value="180"
+                    class="spatial-slider"
+                    oninput="onStudioSliderChange('saturate', this.value, '%')"
+                  />
+                </div>
+
+                <!-- Corner Radius -->
+                <div class="slider-group">
+                  <div class="slider-label-row">
+                    <span>Corner Radius Curvature</span>
+                    <span id="studio-val-radius" class="slider-val-tag">20px</span>
+                  </div>
+                  <input
+                    id="studio-slider-radius"
+                    type="range"
+                    min="4"
+                    max="36"
+                    step="2"
+                    value="20"
+                    class="spatial-slider"
+                    oninput="onStudioSliderChange('radius', this.value, 'px')"
+                  />
+                </div>
+
+                <!-- Background Dimmer -->
+                <div class="slider-group">
+                  <div class="slider-label-row">
+                    <span>Background Dimmer / Darkness</span>
+                    <span id="studio-val-dimmer" class="slider-val-tag">45%</span>
+                  </div>
+                  <input
+                    id="studio-slider-dimmer"
+                    type="range"
+                    min="0"
+                    max="95"
+                    step="5"
+                    value="45"
+                    class="spatial-slider"
+                    oninput="onStudioSliderChange('bgDimmer', this.value, '%')"
+                  />
+                </div>
+
+                <!-- liquidGL Physical Refraction -->
+                <div class="slider-group">
+                  <div class="slider-label-row">
+                    <span>liquidGL Refraction Offset</span>
+                    <span id="studio-val-refract" class="slider-val-tag">0.05</span>
+                  </div>
+                  <input
+                    id="studio-slider-refract"
+                    type="range"
+                    min="1"
+                    max="20"
+                    step="1"
+                    value="5"
+                    class="spatial-slider"
+                    oninput="onStudioSliderChange('refraction', this.value / 100, '')"
+                  />
+                </div>
+
+                <!-- liquidGL Chromatic Aberration -->
+                <div class="slider-group">
+                  <div class="slider-label-row">
+                    <span>liquidGL Chromatic Aberration</span>
+                    <span id="studio-val-aberration" class="slider-val-tag">0.02</span>
+                  </div>
+                  <input
+                    id="studio-slider-aberration"
+                    type="range"
+                    min="0"
+                    max="15"
+                    step="1"
+                    value="2"
+                    class="spatial-slider"
+                    oninput="onStudioSliderChange('aberration', this.value / 100, '')"
+                  />
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="btn-action-group" style="margin-top: 10px;">
+                <button class="btn-secondary active-cloud" onclick="saveCustomTheme()">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                  </svg>
+                  <span>Save Theme to Library</span>
+                </button>
+
+                <button class="btn-secondary" onclick="applyStudioDirect()">
+                  <span>Apply to Portal</span>
+                </button>
+
+                <button class="btn-secondary" onclick="resetStudioInputs()">
+                  <span>Reset Studio</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Your Saved Custom Themes Library -->
+          <div class="settings-group">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+              <h3 class="settings-heading">Your Custom Themes Library</h3>
+              <span id="custom-themes-count-badge" style="font-size: 11.5px; font-weight: 700; color: var(--accent-primary);">0 Saved</span>
+            </div>
+            <p class="settings-sub">User-created themes stored in your browser and synchronized to your Google account.</p>
+
+            <div id="user-custom-themes-list" class="presets-gallery-grid"></div>
+
+            <div class="btn-action-group" style="margin-top: 16px;">
+              <button class="btn-secondary" onclick="exportCustomThemesJson()">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <span>Export Themes (.json)</span>
+              </button>
+
+              <button class="btn-secondary" onclick="triggerImportCustomThemes()">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <span>Import Themes (.json)</span>
+              </button>
+              <input
+                id="import-custom-themes-file"
+                type="file"
+                accept=".json"
+                style="display: none;"
+                onchange="handleImportCustomThemes(event)"
+              />
+            </div>
+          </div>
+
+          <!-- 5. Glass Material Engine & Granular Sliders -->
+          <div class="settings-group">
+            <h3 class="settings-heading">Glass Material Engine</h3>
+            <p class="settings-sub">Choose between real liquidGL WebGL/WebGPU refraction, optical Gaussian blur, or matte obsidian.</p>
+
+            <div class="theme-picker-grid">
+              <button class="theme-card-btn theme-glass-btn" data-glass-style="liquid" onclick="setGlassStyle('liquid')">
+                <div style="width: 22px; height: 22px; border-radius: 6px; background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.4), rgba(255,255,255,0.2));"></div>
+                <div class="theme-title">Liquid Glass</div>
+                <div class="theme-meta-tag">liquidGL WebGL/WebGPU</div>
+              </button>
+
+              <button class="theme-card-btn theme-glass-btn active" data-glass-style="frosted" onclick="setGlassStyle('frosted')">
+                <div style="width: 22px; height: 22px; border-radius: 6px; background: rgba(255,255,255,0.12);"></div>
+                <div class="theme-title">Frosted Glass</div>
+                <div class="theme-meta-tag">VisionOS Optical Blur</div>
+              </button>
+
+              <button class="theme-card-btn theme-glass-btn" data-glass-style="opaque" onclick="setGlassStyle('opaque')">
+                <div style="width: 22px; height: 22px; border-radius: 6px; background: #141419;"></div>
+                <div class="theme-title">Opaque</div>
+                <div class="theme-meta-tag">Matte Obsidian</div>
+              </button>
+            </div>
+
+            <!-- Granular Active Sliders -->
+            <div class="sliders-panel" style="margin-top: 20px;">
+              <div class="slider-group">
+                <div class="slider-label-row">
+                  <span>Glass Blur (Depth of Field)</span>
+                  <span id="val-blur" class="slider-val-tag">28px</span>
+                </div>
+                <input
+                  id="slider-blur"
+                  type="range"
+                  min="0"
+                  max="60"
+                  step="1"
+                  class="spatial-slider"
+                  oninput="onSliderBlur(this.value)"
+                />
+              </div>
+
+              <div class="slider-group">
+                <div class="slider-label-row">
+                  <span>Glass Opacity (Translucency)</span>
+                  <span id="val-opacity" class="slider-val-tag">72%</span>
+                </div>
+                <input
+                  id="slider-opacity"
+                  type="range"
+                  min="20"
+                  max="98"
+                  step="1"
+                  class="spatial-slider"
+                  oninput="onSliderOpacity(this.value)"
+                />
+              </div>
+
+              <div class="slider-group">
+                <div class="slider-label-row">
+                  <span>Color Refraction Saturation</span>
+                  <span id="val-saturate" class="slider-val-tag">180%</span>
+                </div>
+                <input
+                  id="slider-saturate"
+                  type="range"
+                  min="100"
+                  max="260"
+                  step="5"
+                  class="spatial-slider"
+                  oninput="onSliderSaturate(this.value)"
+                />
+              </div>
+
+              <div class="slider-group">
+                <div class="slider-label-row">
+                  <span>Corner Radius Curvature</span>
+                  <span id="val-radius" class="slider-val-tag">20px</span>
+                </div>
+                <input
+                  id="slider-radius"
+                  type="range"
+                  min="4"
+                  max="36"
+                  step="2"
+                  class="spatial-slider"
+                  oninput="onSliderRadius(this.value)"
+                />
+              </div>
+
+              <div class="slider-group">
+                <div class="slider-label-row">
+                  <span>Ambient Glow Intensity</span>
+                  <span id="val-ambient" class="slider-val-tag">12%</span>
+                </div>
+                <input
+                  id="slider-ambient"
+                  type="range"
+                  min="0"
+                  max="40"
+                  step="2"
+                  class="spatial-slider"
+                  oninput="onSliderAmbient(this.value)"
+                />
+              </div>
+
+              <div class="slider-group">
+                <div class="slider-label-row">
+                  <span>Wallpaper Background Dimmer</span>
+                  <span id="val-dimmer" class="slider-val-tag">45%</span>
+                </div>
+                <input
+                  id="slider-dimmer"
+                  type="range"
+                  min="0"
+                  max="95"
+                  step="5"
+                  class="spatial-slider"
+                  oninput="onSliderDimmer(this.value)"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Canvas Background & Wallpaper Uploader -->
+          <div class="settings-group">
+            <h3 class="settings-heading">Canvas Background & Wallpaper</h3>
+            <p class="settings-sub">Upload any image directly from your computer, paste an image URL, or revert to the theme wallpaper.</p>
+
+            <div class="wallpaper-upload-box">
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <div style="font-size: 13px; font-weight: 700; color: #fff;">Upload Image from Computer</div>
+                  <div style="font-size: 11.5px; color: var(--text-dim);">PNG, JPG, WebP automatically optimized for spatial backdrop.</div>
+                </div>
+
+                <button class="btn-secondary" onclick="triggerBgUpload()">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span>Select Local Image</span>
+                </button>
+                <input
+                  id="bg-file-upload"
+                  type="file"
+                  accept="image/*"
+                  style="display: none;"
+                  onchange="handleBgFileUpload(event)"
+                />
+              </div>
+
+              <div style="margin-top: 6px;">
+                <div style="font-size: 11.5px; color: var(--text-dim); margin-bottom: 6px;">Or paste direct image URL:</div>
+                <div class="custom-bg-input-row">
+                  <input
+                    id="custom-bg-input"
+                    type="url"
+                    class="custom-bg-input"
+                    placeholder="https://images.unsplash.com/..."
+                  />
+                  <button class="btn-secondary" onclick="applyCustomBgUrl()">Apply</button>
+                  <button class="btn-secondary" onclick="clearCustomBgUrl()">Clear</button>
+                </div>
+              </div>
+
+              <!-- Active Wallpaper Preview Box -->
+              <div id="wallpaper-preview-box" class="wallpaper-preview-row" style="display: none; margin-top: 8px;">
+                <img id="wallpaper-preview-thumb" class="wallpaper-thumb" src="" alt="Wallpaper Preview" />
+                <span id="wallpaper-preview-text" style="font-size: 11.5px; color: var(--accent-primary); font-weight: 600;">Custom Wallpaper Active</span>
+                <button class="btn-secondary" style="padding: 4px 12px; font-size: 11px;" onclick="revertToThemeWallpaper()">Revert to Theme Wallpaper</button>
+              </div>
+            </div>
+
+            <div style="margin-top: 14px;">
+              <button class="btn-secondary" onclick="resetThemeDefaults()">Reset Theme to Defaults</button>
+            </div>
+          </div>
+
+          <!-- 7. Local Backup (Offline JSON) -->
+          <div class="settings-group">
+            <h3 class="settings-heading">Local Backup (Offline JSON)</h3>
+            <p class="settings-sub">Export or import your complete browser save files, scores, and preferences as JSON</p>
+
+            <div class="btn-action-group">
+              <button class="btn-secondary" onclick="exportSaveFiles()">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <span>Export Saves (.json)</span>
+              </button>
+
+              <button class="btn-secondary" onclick="triggerImportSaves()">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <span>Import Saves (.json)</span>
+              </button>
+              <input
+                id="import-save-file"
+                type="file"
+                accept=".json"
+                style="display: none;"
+                onchange="handleFileImport(event)"
+              />
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Floating Spatial Glass Navigation Dock (STRICTLY LOCKED TO BOTTOM, NEVER TOP) -->
+    <nav class="floating-glass-dock" style="position: fixed !important; bottom: 24px !important; top: auto !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 9999 !important;">
+      <button class="dock-tab-btn active" data-tab="home" onclick="switchTab('home')">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Home</span>
+      </button>
+
+      <button class="dock-tab-btn" data-tab="lib" onclick="switchTab('lib')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Library</span>
+      </button>
+
+      <button class="dock-tab-btn" data-tab="set" onclick="switchTab('set')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0 2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <!-- Clean Game Details Modal -->
+    <div id="game-modal" class="modal-backdrop">
+      <div class="modal-window">
+        <div class="modal-poster-wrap">
+          <img id="modal-banner" src="" alt="Game Poster" />
+          <button class="modal-close-icon" onclick="closeModal()" title="Close">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="modal-inner">
+          <div class="modal-header-row">
+            <h2 id="modal-title" class="modal-main-title">Game Title</h2>
+            <span id="modal-rating" class="modal-rating-badge">★ 4.9</span>
+          </div>
+
+          <div id="modal-path" class="modal-path-tag">Dynamic Blob URL</div>
+          <p id="modal-desc" class="modal-description"></p>
+
+          <div class="modal-btn-row">
+            <button id="modal-play-btn" class="modal-btn-launch">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <span>Play Game</span>
+            </button>
+            <button id="modal-dl-btn" class="modal-btn-download">
+              Download HTML
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popup Modal Iframe (Dynamic Blob URL Execution) -->
+    <div id="game-cinema-layer">
+      <div class="cinema-top-hud">
+        <div class="hud-left">
+          <button class="hud-exit-btn" onclick="closeGame()">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            <span>Exit Game</span>
+          </button>
+          <span id="hud-game-title" class="hud-title">Game Title</span>
+        </div>
+
+        <div class="hud-right">
+          <button id="hud-reload-btn" class="hud-icon-btn" title="Restart Game">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          </button>
+          <button id="hud-fs-btn" class="hud-icon-btn" title="Toggle Fullscreen">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="10" y2="14"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="cinema-loading-bar" class="blob-loading-bar" style="display: none;"></div>
+
+      <iframe
+        id="cinema-iframe"
+        class="cinema-frame"
+        title="Game View"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; gamepad; pointer-lock"
+        sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-downloads allow-modals"
+      ></iframe>
+    </div>
+
+    <!-- liquidGL Liquid Glass Engine (naughtyduk/liquidGL) -->
+    <script src="./scripts/liquidGL.js"></script>
+
+    <!-- Master Script Engine -->
+    <script src="./script.js"></script>
+  </body>
+</html>
