@@ -1036,13 +1036,13 @@
   /* ==========================================================================
      10. FIREBASE GOOGLE AUTHENTICATION & CLOUD SYNC
      ========================================================================== */
-  const firebaseConfig = {
-    apiKey: "AIzaSyDjDoFptza_zH-P5HTlHTbjeeksgcApaso",
-    authDomain: "ilwacohub.firebaseapp.com",
-    projectId: "ilwacohub",
-    storageBucket: "portal-sync-ilwaco.appspot.com",
-    messagingSenderId: "147493360499",
-    appId: "1:147493360499:web:64ebbdea-e8ab-43b7-b1f5-298a1b794386"
+    const firebaseConfig = {
+    apiKey: "AIzaSyC3BXvxdmTXxYd__YKAGtOiRFSf_e0VMI4",
+    authDomain: "ilwaco-hub.firebaseapp.com",
+    projectId: "ilwaco-hub",
+    storageBucket: "ilwaco-hub.firebasestorage.app",
+    messagingSenderId: "1011271079181",
+    appId: "1:1011271079181:web:cd750a07132ecf2b490c44"
   };
 
   let firebaseAuth = null;
