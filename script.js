@@ -1037,9 +1037,9 @@
      10. FIREBASE GOOGLE AUTHENTICATION & CLOUD SYNC
      ========================================================================== */
   const firebaseConfig = {
-    apiKey: "AIzaSyDummyKeyForAuthSetup-PortalSync",
-    authDomain: "portal-sync-ilwaco.firebaseapp.com",
-    projectId: "portal-sync-ilwaco",
+    apiKey: "AIzaSyDjDoFptza_zH-P5HTlHTbjeeksgcApaso",
+    authDomain: "ilwacohub.firebaseapp.com",
+    projectId: "ilwacohub",
     storageBucket: "portal-sync-ilwaco.appspot.com",
     messagingSenderId: "147493360499",
     appId: "1:147493360499:web:64ebbdea-e8ab-43b7-b1f5-298a1b794386"
