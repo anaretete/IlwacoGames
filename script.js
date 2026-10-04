@@ -1033,183 +1033,78 @@
     initStudioDefaults();
   };
 
-  /* ==========================================================================
-     10. FIREBASE GOOGLE AUTHENTICATION & CLOUD SYNC
+    /* ==========================================================================
+     10. NATIVE GOOGLE OAUTH LOGIN (NO FIREBASE NEEDED)
      ========================================================================== */
-    const firebaseConfig = {
-    apiKey: "AIzaSyC3BXvxdmTXxYd__YKAGtOiRFSf_e0VMI4",
-    authDomain: "ilwaco-hub.firebaseapp.com",
-    projectId: "ilwaco-hub",
-    storageBucket: "ilwaco-hub.firebasestorage.app",
-    messagingSenderId: "1011271079181",
-    appId: "1:1011271079181:web:cd750a07132ecf2b490c44"
-  };
+  const GOOGLE_CLIENT_ID = "684538148922-g690ai056djji4f9vuu98kc9huj1prkn.apps.googleusercontent.com";
+  let tokenClient = null;
 
-  let firebaseAuth = null;
-  let firestoreDb = null;
-
-  function initFirebase() {
-    if (typeof window.firebase !== 'undefined') {
-      try {
-        if (!window.firebase.apps.length) {
-          window.firebase.initializeApp(firebaseConfig);
-        }
-        firebaseAuth = window.firebase.auth();
-        firestoreDb = window.firebase.firestore();
-
-        firebaseAuth.onAuthStateChanged(user => {
-          currentUser = user;
-          updateAuthUI(user);
-        });
-      } catch (err) {
-        console.warn('Firebase init:', err.message);
-      }
+  // Initialize Google's Token Client once the library loads
+  function initGoogleAuth() {
+    if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+      setTimeout(initGoogleAuth, 500);
+      return;
     }
+    
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: 'email profile',
+      callback: (response) => {
+        if (response.access_token) {
+          fetchUserProfile(response.access_token);
+        } else {
+          alert("Login failed: No access token received.");
+        }
+      },
+    });
   }
 
-  function updateAuthUI(user) {
-    const signedInBox = document.getElementById('account-signed-in');
-    const signedOutBox = document.getElementById('account-signed-out');
-    const userAvatar = document.getElementById('auth-user-avatar');
-    const userName = document.getElementById('auth-user-name');
-    const userEmail = document.getElementById('auth-user-email');
-    const userUid = document.getElementById('auth-user-uid');
-
-    if (user) {
-      if (signedInBox) signedInBox.style.display = 'block';
-      if (signedOutBox) signedOutBox.style.display = 'none';
-      if (userAvatar) userAvatar.src = user.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80';
-      if (userName) userName.textContent = user.displayName || 'Google Explorer';
-      if (userEmail) userEmail.textContent = user.email || 'Verified Account';
-      if (userUid) userUid.textContent = `UID: ${user.uid.substring(0, 12)}...`;
-    } else {
-      if (signedInBox) signedInBox.style.display = 'none';
-      if (signedOutBox) signedOutBox.style.display = 'block';
-    }
+  function fetchUserProfile(accessToken) {
+    fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    })
+    .then(res => res.json())
+    .then(user => {
+      // Update UI to Signed-In State
+      document.getElementById('account-signed-in').style.display = 'block';
+      document.getElementById('account-signed-out').style.display = 'none';
+      
+      document.getElementById('auth-user-avatar').src = user.picture || '';
+      document.getElementById('auth-user-name').textContent = user.name || 'Google Player';
+      document.getElementById('auth-user-email').textContent = user.email || '';
+      
+      localStorage.setItem('google_access_token', accessToken);
+      localStorage.setItem('user_email', user.email);
+    })
+    .catch(err => {
+      alert("Error fetching profile: " + err.message);
+    });
   }
 
   window.signInWithGoogle = function () {
-    if (!firebaseAuth) {
-      showAuthError('Firebase Authentication is initializing. Please retry in a moment.');
-      return;
+    if (!tokenClient) {
+      initGoogleAuth();
     }
-    const provider = new window.firebase.auth.GoogleAuthProvider();
-    provider.addScope('profile');
-    provider.addScope('email');
-
-    firebaseAuth.signInWithPopup(provider)
-      .then(result => {
-        currentUser = result.user;
-        updateAuthUI(result.user);
-        clearAuthError();
-      })
-      .catch(err => {
-        showAuthError(err.message);
-      });
+    if (tokenClient) {
+      tokenClient.requestAccessToken();
+    } else {
+      alert("Google login engine is still loading. Please try again in a moment.");
+    }
   };
 
   window.signOutUser = function () {
-    if (firebaseAuth) {
-      firebaseAuth.signOut().then(() => {
-        currentUser = null;
-        updateAuthUI(null);
-      });
-    }
+    localStorage.removeItem('google_access_token');
+    localStorage.removeItem('user_email');
+    
+    document.getElementById('account-signed-in').style.display = 'none';
+    document.getElementById('account-signed-out').style.display = 'block';
   };
 
-  function showAuthError(msg) {
-    const el = document.getElementById('auth-error-msg');
-    if (el) el.textContent = msg;
-  }
-
-  function clearAuthError() {
-    const el = document.getElementById('auth-error-msg');
-    if (el) el.textContent = '';
-  }
-
-  window.syncSavesToCloud = function () {
-    const statusMsg = document.getElementById('cloud-sync-status-msg');
-    const timeMeta = document.getElementById('cloud-last-sync-time');
-
-    if (!currentUser) {
-      if (statusMsg) statusMsg.textContent = 'Please sign in with Google to enable Cloud Sync.';
-      return;
-    }
-
-    if (!firestoreDb) {
-      if (statusMsg) statusMsg.textContent = 'Cloud database initializing. Please wait a second.';
-      return;
-    }
-
-    if (statusMsg) statusMsg.textContent = 'Serializing browser saves & themes to cloud...';
-
-    // Collect all local storage keys
-    const backupData = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      backupData[key] = localStorage.getItem(key);
-    }
-
-    const payload = {
-      uid: currentUser.uid,
-      email: currentUser.email,
-      displayName: currentUser.displayName,
-      updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
-      customThemes: userCustomThemes,
-      activeThemeConfig: currentConfig,
-      storageKeysCount: Object.keys(backupData).length,
-      payload: JSON.stringify(backupData)
-    };
-
-    firestoreDb.collection('portal_cloud_saves').doc(currentUser.uid).set(payload, { merge: true })
-      .then(() => {
-        const now = new Date().toLocaleTimeString();
-        if (statusMsg) statusMsg.textContent = `✓ Successfully synced ${Object.keys(backupData).length} items & custom themes to Google Cloud!`;
-        if (timeMeta) timeMeta.textContent = `Last synchronized: Today at ${now}`;
-      })
-      .catch(err => {
-        if (statusMsg) statusMsg.textContent = `Sync notice: ${err.message}`;
-      });
-  };
-
-  window.restoreSavesFromCloud = function () {
-    const statusMsg = document.getElementById('cloud-sync-status-msg');
-
-    if (!currentUser) {
-      if (statusMsg) statusMsg.textContent = 'Please sign in with Google first.';
-      return;
-    }
-
-    if (!firestoreDb) return;
-    if (statusMsg) statusMsg.textContent = 'Fetching cloud save file from Firestore...';
-
-    firestoreDb.collection('portal_cloud_saves').doc(currentUser.uid).get()
-      .then(doc => {
-        if (!doc.exists) {
-          if (statusMsg) statusMsg.textContent = 'No cloud save found for this Google account.';
-          return;
-        }
-
-        const data = doc.data();
-        if (data.payload) {
-          const parsed = JSON.parse(data.payload);
-          Object.keys(parsed).forEach(k => {
-            localStorage.setItem(k, parsed[k]);
-          });
-        }
-        if (data.customThemes && Array.isArray(data.customThemes)) {
-          userCustomThemes = data.customThemes;
-          localStorage.setItem('portal_user_custom_themes', JSON.stringify(userCustomThemes));
-        }
-
-        loadThemeConfig();
-        if (statusMsg) statusMsg.textContent = `✓ Cloud saves & themes restored successfully!`;
-      })
-      .catch(err => {
-        if (statusMsg) statusMsg.textContent = `Restore failed: ${err.message}`;
-      });
-  };
-
+  // Auto-initialize on load
+  window.addEventListener('DOMContentLoaded', () => {
+    initGoogleAuth();
+  });
+  
   /* ==========================================================================
      11. LOCAL BACKUP (OFFLINE JSON EXPORT & IMPORT)
      ========================================================================== */
